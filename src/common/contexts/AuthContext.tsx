@@ -26,12 +26,12 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for existing user session on app load
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const userData = await getUserData();
-        if (userData && userData.token) {
+  // Add this function to improve error handling in checkAuth
+  const checkAuth = async () => {
+    try {
+      const userData = await getUserData();
+      if (userData && userData.token) {
+        try {
           const authInteractor = new AuthInteractor();
           const hasProfile = await authInteractor.checkProfileExists(userData.id);
           
@@ -43,19 +43,27 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             setUser(userData);
             setIsAuthenticated(false);
           }
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
+        } catch (networkError) {
+          console.error('Network error during profile check:', networkError);
+          // Assume user is authenticated if we have token but can't check profile due to network
+          setUser(userData);
+          setIsAuthenticated(true);
         }
-      } catch (e) {
-        console.error('Auth check failed:', e);
+      } else {
         setUser(null);
         setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch (e) {
+      console.error('Auth check failed:', e);
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Check for existing user session on app load
+  useEffect(() => {
     checkAuth();
   }, []);
 

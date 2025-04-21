@@ -7,6 +7,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 seconds timeout
 });
 
 // Add request interceptor to include token on authenticated requests
@@ -25,10 +26,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle 401 errors globally
-    if (error.response && error.response.status === 401) {
-      // Handle unauthorized (could redirect to login)
-      console.error('Unauthorized access');
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout');
+    } else if (error.message === 'Network Error') {
+      console.error('Network error - please check your connection');
+    } else if (error.response) {
+      console.error(`API Error: ${error.response.status}`, error.response.data);
+    } else {
+      console.error('Unknown API error:', error);
     }
     return Promise.reject(error);
   }

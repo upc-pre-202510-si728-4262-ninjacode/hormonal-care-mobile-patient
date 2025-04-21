@@ -6,16 +6,14 @@ import { navigationRef } from '../router/navigationRouter';
 import { RootStackParamList } from '../entity/navigationEntities';
 import AuthNavigator from './AuthNavigator';
 import BottomTabNavigator from './BottomTabNavigator';
-import { NavigationInteractor } from '../interactor/navigationInteractor';
-import { useNavigationPresenter } from '../presenter/navigationPresenter';
+import { useAuth } from '../../../common/contexts/AuthContext';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
-  // Usando el presenter de navegación en vez de useAuth directamente
-  const navigationInteractor = new NavigationInteractor();
-  const { isAuthenticated, isLoading } = useNavigationPresenter(navigationInteractor);
-
+  // Use the AuthContext directly instead of the navigation presenter
+  const { isAuthenticated, isLoading } = useAuth();
+  
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
