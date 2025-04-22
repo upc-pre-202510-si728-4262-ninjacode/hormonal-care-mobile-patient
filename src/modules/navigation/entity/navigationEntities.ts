@@ -11,13 +11,14 @@ export type AuthStackParamList = {
 export type TabStackParamList = {
   Home: undefined;
   Appointments: undefined;
-  Records: undefined;
+  Messages: undefined;
   Profile: undefined;
 };
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   MainApp: NavigatorScreenParams<TabStackParamList>;
+  Notifications: undefined;
 };
 
 export interface NavigationState {
