@@ -8,6 +8,8 @@ import Button from '../../../common/components/Button';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../../modules/navigation/entity/navigationEntities';
 
+
+
 // Define the navigation prop type for this screen
 type RegisterScreenNavigationProp = StackNavigationProp<AuthStackParamList>;
 

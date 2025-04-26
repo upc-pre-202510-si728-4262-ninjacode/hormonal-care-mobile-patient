@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AuthInteractor } from '../interactors/authInteractor';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   SignInRequest, 
   SignUpRequest, 
