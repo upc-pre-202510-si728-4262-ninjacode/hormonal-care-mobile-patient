@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Avatar, Card } from 'react-native-paper';
+import Button from '../../../common/components/Button';
+import { useAuth } from '../../../common/contexts/AuthContext';
 
 const ProfilePlaceholder = () => {
   // Información del perfil (puedes reemplazar esto con datos dinámicos)
@@ -17,6 +19,13 @@ const ProfilePlaceholder = () => {
     familyHistory: 'Diabetes',
     doctorId: 12345,
   });
+
+  const { logout } = useAuth();
+  
+    const handleLogout = async () => {
+      await logout();
+      // No need for navigation - it will happen automatically when auth state changes
+    };
 
   return (
 <View style={styles.container}>
@@ -81,6 +90,12 @@ const ProfilePlaceholder = () => {
           </View>
         </Card.Content>
       </Card>
+      <Button 
+        title="Logout" 
+        onPress={handleLogout} 
+        variant="outline"
+        style={styles.logoutButton}
+      />
     </View>
   );
 };
@@ -151,6 +166,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  logoutButton: {
+    width: '50%',
   },
 });
 

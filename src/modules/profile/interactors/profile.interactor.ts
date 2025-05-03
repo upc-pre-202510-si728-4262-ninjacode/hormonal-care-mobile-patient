@@ -1,40 +1,20 @@
+import { API_URL } from '@env'; // Importa la URL base desde el .env
 import { ProfileEntity } from '../entities/profile.entity';
-import { API_URL } from '@env'
 
 export class ProfileInteractor {
-  private baseUrl = API_URL;
+  private baseUrl = `${API_URL}/profile`; // Construye la URL base para el perfil
 
-  async fetchProfileById(profileId: number): Promise<ProfileEntity> {
-    const response = await fetch(`${this.baseUrl}/${profileId}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch profile');
-    }
-    return response.json();
-  }
-
-  async updateProfile(profileId: number, profile: ProfileEntity): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/${profileId}/full-update`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profile),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to update profile');
-    }
-  }
-
-  async updatePhoneNumber(profileId: number, phoneNumber: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/${profileId}/phoneNumber`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ phoneNumber }),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to update phone number');
+  async fetchProfile(userId: number): Promise<ProfileEntity> {
+    try {
+      const response = await fetch(`${this.baseUrl}/${userId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      const data = await response.json();
+      return data as ProfileEntity; // Asegúrate de que los datos coincidan con la entidad
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
     }
   }
 }

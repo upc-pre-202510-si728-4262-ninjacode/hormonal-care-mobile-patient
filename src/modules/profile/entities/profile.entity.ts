@@ -1,6 +1,7 @@
 export interface ProfileEntity {
     id: number;
-    fullName: string;
+    firstName: string;
+    lastName: string;
     gender: string;
     phoneNumber: string;
     image: string;
