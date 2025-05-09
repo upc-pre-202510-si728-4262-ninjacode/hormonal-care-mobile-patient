@@ -11,6 +11,7 @@ interface InputProps {
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   style?: any;
   error?: string;
+  type?: string;
 }
 
 const Input = ({ 
@@ -22,6 +23,7 @@ const Input = ({
   autoCapitalize = 'none',
   style,
   error,
+  type,
   ...props 
 }: InputProps) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -32,6 +34,7 @@ const Input = ({
       
       <View style={[styles.inputContainer, error ? styles.inputError : styles.inputNormal]}>
         <TextInput
+          keyboardType= {type === 'number' ? 'numeric' : 'default'}
           style={[styles.input, style]}
           value={value}
           onChangeText={onChangeText}

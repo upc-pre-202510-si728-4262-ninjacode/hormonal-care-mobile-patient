@@ -10,6 +10,8 @@ import Input from '../../../common/components/Input';
 import Button from '../../../common/components/Button';
 import { useAuth } from '../../../common/contexts/AuthContext';
 import { getUserData } from '../../../common/storage/tokenStorage';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dropdown } from 'react-native-element-dropdown';
 
 type CreateProfileScreenNavigationProp = StackNavigationProp<AuthStackParamList> & 
                                         StackNavigationProp<RootStackParamList>;
@@ -69,9 +71,17 @@ const CreateProfileScreen = () => {
       setBirthdate(selectedDate);
     }
   };
+  
+  const genders = [
+    { label: 'Maculino', value: 'Masculino' },
+    { label: 'Femenino', value: 'Femenino' },
+    { label: 'Otro', value: 'Otro' },
+    { label: 'Prefiero no decirlo', value: 'Prefiero no decirlo' },
+  ]
 
   return (
-    <KeyboardAvoidingView
+    <SafeAreaView style={{ flex: 1 }}>
+          <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.keyboardView}
     >
@@ -109,6 +119,7 @@ const CreateProfileScreen = () => {
           />
 
           <Input
+            type='number'
             label="Phone Number *"
             value={phoneNumber}
             onChangeText={setPhoneNumber}
@@ -165,6 +176,7 @@ const CreateProfileScreen = () => {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
