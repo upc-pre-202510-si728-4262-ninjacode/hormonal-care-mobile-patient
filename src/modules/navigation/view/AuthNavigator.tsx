@@ -4,6 +4,7 @@ import { AuthStackParamList } from '../entity/navigationEntities';
 import LoginScreen from '../../auth/views/LoginScreen';
 import RegisterScreen from '../../auth/views/RegisterScreen';
 import CreateProfileScreen from '../../auth/views/CreateProfileScreen';
+import { Easing } from 'react-native';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
@@ -12,7 +13,29 @@ const AuthNavigator = () => {
     <Stack.Navigator 
       screenOptions={{ 
         headerShown: false,
-        cardStyle: { backgroundColor: 'white' } 
+        cardStyle: { backgroundColor: 'transparent' },
+        cardStyleInterpolator: ({ current: { progress } }) => ({
+          cardStyle: {
+            opacity: progress,
+          },
+        }),
+        transitionSpec: {
+          open: {
+            animation: 'timing',
+            config: {
+              duration: 300,
+              easing: Easing.inOut(Easing.ease),
+            },
+          },
+          close: {
+            animation: 'timing',
+            config: {
+              duration: 300,
+              easing: Easing.inOut(Easing.ease),
+            },
+          },
+        },
+        gestureEnabled: false,
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />
