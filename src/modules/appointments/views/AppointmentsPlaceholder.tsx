@@ -82,7 +82,11 @@ const AppointmentsPlaceholder = ({ presenter }: Props) => {
 
   useEffect(() => {
     const dataAppointments = appointments.filter(item => {
-      return item.eventDate === selectedDate.toISOString().split('T')[0] && item.startTime !== '00:00:00';
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const selectedDateString = `${year}-${month}-${day}`;
+      return item.eventDate === selectedDateString;
     });
     dataAppointments.sort((a, b) => {
       const dateA = new Date(`${a.eventDate}T${a.startTime}`);
