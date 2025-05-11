@@ -24,6 +24,8 @@ import { useAuthPresenter } from '../presenters/authPresenter';
 import Button from '../../../common/components/Button';
 import { useAuth } from '../../../common/contexts/AuthContext';
 import { getUserData } from '../../../common/storage/tokenStorage';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dropdown } from 'react-native-element-dropdown';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -415,6 +417,7 @@ const CreateProfileScreen = () => {
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
+    </SafeAreaView>
 
       <Modal
         visible={showGenderDropdown}

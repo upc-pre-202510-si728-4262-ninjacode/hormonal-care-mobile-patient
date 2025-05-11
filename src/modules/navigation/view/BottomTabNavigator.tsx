@@ -8,8 +8,13 @@ import ProfilePlaceholder from '../../profile/views/ProfilePlaceholder';
 import AppointmentsPlaceholder from '../../appointments/views/AppointmentsPlaceholder';
 import MessagesPlaceholder from '../../messages/views/MessagesPlaceholder';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { AppointmentsInteractor } from '../../appointments/interactors/appointmentsInteractor';
+import { AppointmentsListPresenter } from '../../appointments/presenters/appointmentsPresenter';
 
 const Tab = createBottomTabNavigator<TabStackParamList>();
+
+const interactor = new AppointmentsInteractor();
+const presenter = new AppointmentsListPresenter(interactor);
 
 const getIconName = (routeName: string, focused: boolean): any => {
   switch (routeName) {
@@ -56,9 +61,9 @@ const BottomTabNavigator = () => {
         }}
       />
       <Tab.Screen 
-        name="Appointments" 
-        component={AppointmentsPlaceholder} 
-      />
+        name="Appointments">
+        {() => <AppointmentsPlaceholder presenter={presenter} />}
+      </Tab.Screen>
       <Tab.Screen name="Messages" component={MessagesPlaceholder} />
       <Tab.Screen name="Profile" component={ProfilePlaceholder} />
     </Tab.Navigator>
