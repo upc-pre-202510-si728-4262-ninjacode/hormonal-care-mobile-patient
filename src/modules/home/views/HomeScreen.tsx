@@ -1,8 +1,14 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { HomeRouter } from '../router/home.router';
+import { useAuth } from '../../../common/contexts/AuthContext';
+import Button from '../../../common/components/Button';
 
 const HomeScreen = ({ navigation }: any) => {
+   const { user, logout } = useAuth();
+  const handleLogout = async () => {
+    await logout();
+  };
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header */}
@@ -66,11 +72,18 @@ const HomeScreen = ({ navigation }: any) => {
       <View style={styles.footer}>
         <Text style={styles.footerText}>HormoIA - Cuidando tu equilibrio hormonal 🌟</Text>
       </View>
+      <Button 
+        title="Logout" 
+        onPress={handleLogout} 
+        variant="outline"
+        style={styles.logoutButton}
+      />
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  logoutButton: { width: '50%' },
   container: { 
     padding: 20, 
     backgroundColor: 'white', 
