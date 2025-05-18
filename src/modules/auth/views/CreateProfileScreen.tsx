@@ -185,7 +185,6 @@ const CreateProfileScreen = () => {
       lastName,
       gender,
       phoneNumber,
-      image: "",
       birthday: birthdate.toISOString(),
       userId,
       typeOfBlood,
@@ -209,13 +208,6 @@ const CreateProfileScreen = () => {
       setBirthdate(selectedDate);
     }
   };
-  
-  const genders = [
-    { label: 'Maculino', value: 'Masculino' },
-    { label: 'Femenino', value: 'Femenino' },
-    { label: 'Otro', value: 'Otro' },
-    { label: 'Prefiero no decirlo', value: 'Prefiero no decirlo' },
-  ]
 
   const handleGenderSelect = (value: string, label: string) => {
     setGender(value);

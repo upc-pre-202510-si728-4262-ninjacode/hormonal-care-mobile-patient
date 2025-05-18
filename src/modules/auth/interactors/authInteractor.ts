@@ -43,7 +43,12 @@ export class AuthInteractor {
 
   async createPatientProfile(data: PatientProfileRequest): Promise<PatientProfileResponse> {
     try {
-      const response = await apiClient.post<PatientProfileResponse>('/api/v1/medical-record/patient', data);
+      const response = await apiClient.post<PatientProfileResponse>('/api/v1/medical-record/patient', data,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Create profile error:', error);

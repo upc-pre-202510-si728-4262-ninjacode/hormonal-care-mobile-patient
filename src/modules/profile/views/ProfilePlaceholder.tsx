@@ -40,6 +40,12 @@ export const ProfilePlaceholder = () => {
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#6200ee" />
         <Text style={styles.loadingText}>Loading profile...</Text>
+        <Button 
+        title="Logout" 
+        onPress={handleLogout} 
+        variant="outline"
+        style={styles.logoutButton}
+      />
       </View>
     );
   }

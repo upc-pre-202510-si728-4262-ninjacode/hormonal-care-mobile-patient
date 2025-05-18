@@ -26,7 +26,7 @@ export interface PatientProfileRequest {
   lastName: string;
   gender: string;
   phoneNumber: string;
-  image: string;
+  // image: string;
   birthday: string;
   userId: number;
   typeOfBlood: string;
