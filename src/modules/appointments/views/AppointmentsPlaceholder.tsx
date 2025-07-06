@@ -2,23 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
-import { AppointmentsCard } from './AppointmentsCard';
-import { DoctorsCard } from './DoctorsCard';
+import { DoctorsCard } from './DoctorsShortList';
 import { AppointmentsRowCalendar } from './AppointmentsRowCalendar';
 import { AppointmentsListPresenter, AppointmentsListViewInterface } from '../presenters/appointmentsPresenter';
 import { AppointmentResponse, AppointmentState } from '../entities/appointmentEntitie';
 import { DoctorResponse } from '../entities/doctorEntitie';
-import { AppointmentsSearchList } from './AppointmentsSearchList';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigation/entity/navigationEntities';
+import { AppointmentShortList } from './AppointmentsShortList';
 
 interface Props {
   presenter: AppointmentsListPresenter;
 }
 
 const AppointmentsPlaceholder = ({ presenter }: Props) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [dateFilteredAppointments, setDateFilteredAppointments] = useState<AppointmentResponse[]>([]);
-  const [searchFilteredAppointments, setSearchFilteredAppointments] = useState<AppointmentResponse[]>([]);
   const [doctor, setDoctor] = useState<DoctorResponse>({} as DoctorResponse);
   const [appointmentLoading, setAppointmentLoading] = useState<boolean>(true);
   const [appointmentError, setAppointmentError] = useState<string>('');
@@ -58,27 +57,16 @@ const AppointmentsPlaceholder = ({ presenter }: Props) => {
 
   const filteredData = appointments.filter(item => new Date(`${item.eventDate}T${item.endTime}`) > new Date());
   const sortedData = filteredData.sort((a, b) => {
-      const dateA = new Date(`${a.eventDate}T${a.startTime}`);
-      const dateB = new Date(`${b.eventDate}T${b.startTime}`);
-      return dateA.getTime() - dateB.getTime();
-    }
+    const dateA = new Date(`${a.eventDate}T${a.startTime}`);
+    const dateB = new Date(`${b.eventDate}T${b.startTime}`);
+    return dateA.getTime() - dateB.getTime();
+  }
   );
   const onlyDataToDisplay = sortedData[0] ? [sortedData[0]] : [];
   const firstItem = onlyDataToDisplay[0];
   const appointmentsDates = appointments.map(item => item.eventDate);
 
-  useEffect(() => {
-    const filteredAppointments = appointments.filter(item => {
-      return (
-        (item.doctorFullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.startTime.includes(searchQuery) ||
-          item.endTime.includes(searchQuery)) || item.doctorSpecialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.state.toLowerCase().includes(searchQuery.toLowerCase()
-        )
-      );
-    });
-    setSearchFilteredAppointments(filteredAppointments);
-  }, [searchQuery, appointments]);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     const dataAppointments = appointments.filter(item => {
@@ -113,45 +101,31 @@ const AppointmentsPlaceholder = ({ presenter }: Props) => {
           <View style={styles.searchBar}>
             <TextInput
               style={styles.searchInput}
-              placeholder="Search appointments"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
+              placeholder="AI doctor and appointment search"
+              placeholderTextColor={'#b6b7b8'}
+              onTouchStart={() =>
+                navigation.navigate('AppointmentsSearch')
+              }
             />
             <Ionicons name="search-outline" size={20} color="#666" style={styles.searchIcon} />
-            {searchQuery ? (
-              <Ionicons
-                name="close-circle"
-                size={20}
-                color="#666"
-                style={styles.clearIcon}
-                onPress={() => setSearchQuery('')}
-              />
-            ) : null}
           </View>
         </View>
         {
-          searchQuery.length === 0 ? (
-            <View style={styles.contentContainer}>
-              <Text style={styles.title}>{firstItem
-                ? firstItem.state === AppointmentState.ONGOING
-                  ? "Current Appointment"
-                  : "Next Appointment"
-                : "No Appointment"}</Text>
-              <AppointmentsCard data={onlyDataToDisplay} loading={appointmentLoading} error={appointmentError} />
-              <Text style={styles.subText}>Appointments Timeline</Text>
-              <AppointmentsRowCalendar selectedDate={selectedDate} appointmentsDates={appointmentsDates} setSelectedDate={setSelectedDate} />
-              <AppointmentsCard data={dateFilteredAppointments} loading={appointmentLoading} error={appointmentError} />
-              <Text style={styles.secondTitle}>Current Doctor</Text>
-              <DoctorsCard data={doctor} loading={doctorLoading} error={doctorError} />
-            </View>
-          ) : (
-            <AppointmentsSearchList
-              searchQuery={searchQuery}
-              searchFilteredAppointments={searchFilteredAppointments}
-              appointmentLoading={appointmentLoading}
-              appointmentError={appointmentError}
-            />
-          )
+
+          <View style={styles.contentContainer}>
+            <Text style={styles.title}>{firstItem
+              ? firstItem.state === AppointmentState.ONGOING
+                ? "Current Appointment"
+                : "Next Appointment"
+              : "No Appointment"}</Text>
+            <AppointmentShortList data={onlyDataToDisplay} loading={appointmentLoading} error={appointmentError} />
+            <Text style={styles.subText}>Appointments Timeline</Text>
+            <AppointmentsRowCalendar selectedDate={selectedDate} appointmentsDates={appointmentsDates} setSelectedDate={setSelectedDate} />
+            <AppointmentShortList data={dateFilteredAppointments} loading={appointmentLoading} error={appointmentError} />
+            <Text style={styles.secondTitle}>Current Doctor</Text>
+            <DoctorsCard data={doctor} loading={doctorLoading} error={doctorError} />
+          </View>
+
         }
       </ScrollView>
     </View>
@@ -184,9 +158,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     height: 40,
-  },
-  clearIcon: {
-    marginLeft: 8,
   },
   contentContainer: {
     justifyContent: 'center',

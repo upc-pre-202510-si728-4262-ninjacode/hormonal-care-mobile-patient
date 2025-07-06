@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, Image, useColorScheme } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { DoctorResponse } from '../entities/doctorEntitie';
 import { Skeleton } from 'moti/skeleton';
+import { DoctorCard } from '../components/DoctorCard';
 
 interface DoctorsCardProps {
     data: DoctorResponse;
@@ -56,24 +57,10 @@ export const DoctorsCard = ({ data, loading, error }: DoctorsCardProps) => {
         <>
             {
                 !isEmptyData ? (
-                    <View style={styles.contentContainer}>
-                        <View style={styles.imageBox}>
-                            <Image source={{ uri: `${data.image}` }} resizeMode='cover' style={styles.image} />
-                        </View>
-                        <View style={styles.descriptionBox}>
-                            <View style={styles.iconRow}>
-                                <Text style={{ fontWeight: 'bold', fontSize: 15 }}>{data.fullName}</Text>
-                            </View>
-                            <View style={styles.iconRow}>
-                                <FontAwesome name="stethoscope" size={16} style={{ marginRight: 5 }} />
-                                <Text style={{ fontSize: 12 }}>{data.subSpecialty}</Text>
-                            </View>
-                            <View style={styles.iconRow}>
-                                <FontAwesome name="id-card" size={16} style={{ marginRight: 5 }} />
-                                <Text style={{ fontSize: 12 }}>{data.professionalIdentificationNumber}</Text>
-                            </View>
-                        </View>
-                    </View>
+                    <DoctorCard
+                        data={data}
+                        size='large'
+                    />
                 ) : (
                     <View style={styles.noDataContainer}>
                         <Text style={styles.subText}>No Data Available</Text>

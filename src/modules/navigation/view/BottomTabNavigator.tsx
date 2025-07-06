@@ -1,20 +1,23 @@
-import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { TabStackParamList, RootStackParamList } from '../entity/navigationEntities';
 import HomeScreen from '../../home/views/HomeScreen';
-import ProfilePlaceholder from '../../profile/views/ProfilePlaceholder';
-import AppointmentsPlaceholder from '../../appointments/views/AppointmentsPlaceholder';
-import MessagesPlaceholder from '../../messages/views/MessagesPlaceholder';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { AppointmentsInteractor } from '../../appointments/interactors/appointmentsInteractor';
 import { AppointmentsListPresenter } from '../../appointments/presenters/appointmentsPresenter';
+import { ProfileInteractor } from '../../profile/interactors/profile.interactor';
+import { ProfilePresenter } from '../../profile/presenters/profile.presenter';
+import AppointmentsStack from '../stacks/appointmentStack';
+import { MessagesPlaceholder } from '../../messages/views/MessagesPlaceholder';
+import SettingsStack from '../stacks/settingsStack';
 
 const Tab = createBottomTabNavigator<TabStackParamList>();
 
-const interactor = new AppointmentsInteractor();
-const presenter = new AppointmentsListPresenter(interactor);
+const appointmentsInteractor = new AppointmentsInteractor();
+const appointmentsPresenter = new AppointmentsListPresenter(appointmentsInteractor);
+const profileInteractor = new ProfileInteractor();
+const profilePresenter = new ProfilePresenter(profileInteractor);
 
 const getIconName = (routeName: string, focused: boolean): any => {
   switch (routeName) {
@@ -26,15 +29,14 @@ const getIconName = (routeName: string, focused: boolean): any => {
       return focused ? 'chatbubbles' : 'chatbubbles-outline';
     case 'Profile':
       return focused ? 'person' : 'person-outline';
-    default: 
+    default:
       return 'help-outline';
   }
 };
 
 const BottomTabNavigator = () => {
-  // Use the correct navigation type that includes the root navigation options
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -46,13 +48,13 @@ const BottomTabNavigator = () => {
         headerShown: true,
       })}
     >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeScreen} 
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
         options={{
           headerRight: () => (
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('Notifications')} 
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Notifications')}
               style={{ marginRight: 15 }}
             >
               <Ionicons name="notifications-outline" size={24} color="#6200ee" />
@@ -60,12 +62,19 @@ const BottomTabNavigator = () => {
           )
         }}
       />
-      <Tab.Screen 
-        name="Appointments">
-        {() => <AppointmentsPlaceholder presenter={presenter} />}
+      <Tab.Screen
+        name="Appointments" options={{ headerShown: false }}>
+        {() => <AppointmentsStack presenter={appointmentsPresenter} />}
       </Tab.Screen>
       <Tab.Screen name="Messages" component={MessagesPlaceholder} />
-      <Tab.Screen name="Profile" component={ProfilePlaceholder} />
+      <Tab.Screen
+        name="Profile"
+        options={{
+          headerShown: false,
+        }}
+      >
+        {() => <SettingsStack />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };

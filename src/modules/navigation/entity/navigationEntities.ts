@@ -19,6 +19,15 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   MainApp: NavigatorScreenParams<TabStackParamList>;
   Notifications: undefined;
+  AppointmentsSearch: undefined;
+  AppointmentsHome: undefined;
+  ProfileHome: undefined;
+  Settings: undefined;
+  ProfileSettings: undefined;
+  NotificationSettings: undefined;
+  PrivacySettings: undefined;
+  QrCode: undefined;
+  LanguageSettings: undefined;
 };
 
 export interface NavigationState {

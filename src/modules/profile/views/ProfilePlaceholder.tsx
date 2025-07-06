@@ -1,136 +1,199 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { Avatar, Card } from 'react-native-paper';
-import Button from '../../../common/components/Button';
+import { View, Text, Image, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import Feather from 'react-native-vector-icons/Feather';
 import { useAuth } from '../../../common/contexts/AuthContext';
-import { PatientEntity } from '../entities/patient.entity';
-import { ProfileEntity } from '../entities/profile.entity';
+import { FullDataProfileEntity } from '../entities/profile.entity';
 import { ProfilePresenter } from '../presenters/profile.presenter';
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler';
+import { PersonalInformationView } from './PersonalInformationView';
+import { MedicalInformationView } from './MedicalInformationView';
+import { Skeleton } from 'moti/skeleton';
+import { useProfile } from '../../../common/contexts/ProfileContext';
 
-export const ProfilePlaceholder = () => {
-  const { user, logout } = useAuth();
-  const [profile, setProfile] = useState<ProfileEntity | null>(null);
-  const [patient, setPatient] = useState<PatientEntity | null>(null);
+interface Props {
+  presenter: ProfilePresenter;
+}
+
+export const ProfilePlaceholder = ({ presenter }: Props) => {
+  const { user } = useAuth();
+  const { profile, setProfile } = useProfile();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+  const [personalInformationData, setPersonalInformationData] = useState<{ name: string; value: string }[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isBlurred, setIsBlurred] = useState(false);
+  const [medicalInformationData, setMedicalInformationData] = useState<{
+    typeOfBlood: string;
+    personalHistory: string;
+    familyHistory: string;
+    doctorId: number | null;
+  }>({
+    typeOfBlood: 'No Specified',
+    personalHistory: 'No Specified',
+    familyHistory: 'No Specified',
+    doctorId: null,
+  });
+
+  const toggleBlur = () => {
+    setIsBlurred(prev => !prev);
+  };
+
+  const profileViewInterface = {
+    showLoading: () => setLoading(true),
+    hideLoading: () => setLoading(false),
+    showError: (message: string) => setError(message),
+    showProfile: (profile: FullDataProfileEntity) => setProfile(profile),
+  };
 
   useEffect(() => {
-    if (user?.id) {
-      const presenter = new ProfilePresenter({
-        displayProfile: (profileData, patientData) => {
-          console.log('Profile data:', profileData); 
-          setProfile(profileData);
-          setPatient(patientData);
-          setLoading(false);
-        },
-        displayError: (message: string) => {
-          Alert.alert('Error', message);
-          setLoading(false);
-        }
-      });
+    if (user) {
+      presenter.attachProfileView(profileViewInterface);
       presenter.loadProfile(user.id);
     }
   }, [user]);
 
-  const handleLogout = async () => {
-    await logout();
-  };
+  useEffect(() => {
+    if (profile) {
+      const personalData = [
+        { name: 'Name', value: profile.fullName },
+        { name: 'Birthday', value: profile.birthday.split('T')[0] },
+        { name: 'Gender', value: profile.gender },
+      ];
+      const medicalData = {
+        typeOfBlood: profile.typeOfBlood || 'No Specified',
+        personalHistory: profile.personalHistory || 'No Specified',
+        familyHistory: profile.familyHistory || 'No Specified',
+        doctorId: profile.doctorId || null,
+      };
 
-  if (loading || !profile || !patient) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6200ee" />
-        <Text style={styles.loadingText}>Loading profile...</Text>
-        <Button 
-        title="Logout" 
-        onPress={handleLogout} 
-        variant="outline"
-        style={styles.logoutButton}
-      />
-      </View>
-    );
-  }
+      setMedicalInformationData(medicalData);
+      setPersonalInformationData(personalData);
+    }
+  }, [profile]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      if (user) {
+        await presenter.loadProfile(user.id);
+      }
+    } catch (error) {
+      console.error('Error refreshing profile:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Avatar.Icon size={120} icon="account-circle" style={styles.avatar} />
-      <View style={styles.infoRow}>
-            <Text style={styles.name}>{profile.fullName}</Text>
-      </View>
-
-      <View style={styles.editButtonContainer}>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => Alert.alert('Edit Profile', 'This feature is not implemented yet.')}
-        >
-          <Text style={styles.editButtonText}>Edit Profile</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Card style={styles.card}>
-        <Card.Content>
-          
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>👤 Gender:</Text>
-            <Text style={styles.value}>{profile.gender}</Text>
+      <ScrollView refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
+        {
+          loading ? (
+            <View style={styles.contentContainer}>
+              <View style={styles.loadingImageBox}>
+                <Skeleton height={120} width={120} radius="round" colorMode="light" />
+              </View>
+              <View style={{ height: 20, marginTop: 25 }}>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.contentContainer}>
+              <View style={styles.imageBox}>
+                <Image source={{ uri: "https://www.pngplay.com/wp-content/uploads/11/Meowth-Pokemon-Transparent-File.png" }} resizeMode='cover' style={styles.image} />
+              </View>
+              <View>
+                <Text style={styles.secondTitle}>{profile?.fullName}</Text>
+              </View>
+            </View>
+          )
+        }
+        <View style={styles.secondContainer}>
+          <Text style={styles.thirdTitle}>Personal Information</Text>
+        </View>
+        <PersonalInformationView data={personalInformationData} loading={loading} error={error} />
+        <View style={styles.secondContainer}>
+          <Text style={styles.thirdTitle}>Medical Information</Text>
+          <TouchableOpacity onPress={toggleBlur}>
+            <Feather name={isBlurred ? 'eye' : 'eye-off'} size={20} color="black" />
+          </TouchableOpacity>
+        </View>
+        <MedicalInformationView data={medicalInformationData} loading={loading} error={error} isBlurred={isBlurred} />
+        <View style={styles.secondContainer}>
+          <Text style={styles.thirdTitle}>Personal Resume</Text>
+          <View>
+            <Text style={styles.aiTitle}>AI</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>📞 Phone:</Text>
-            <Text style={styles.value}>{profile.phoneNumber}</Text>
+        </View>
+        <View style={styles.secondContainer}>
+          <Text style={styles.thirdTitle}>Prescriptions</Text>
+          <View>
+            <Text style={styles.aiTitle}>AI</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>🎂 Birthday:</Text>
-            <Text style={styles.value}>
-              {new Date(profile.birthday).toLocaleDateString()}
-            </Text>
-          </View>
-        </Card.Content>
-      </Card>
-
-      <Card style={styles.card}>
-        <Card.Content>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>🩸 Blood Type:</Text>
-            <Text style={styles.value}>{patient.typeOfBlood ?? 'N/A'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>📋 Personal History:</Text>
-            <Text style={styles.value}>{patient.personalHistory ?? 'N/A'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>👨‍👩‍👧 Family History:</Text>
-            <Text style={styles.value}>{patient.familyHistory ?? 'N/A'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>🩺 Doctor ID:</Text>
-            <Text style={styles.value}>{patient.doctorId ?? 'N/A'}</Text>
-          </View>
-        </Card.Content>
-      </Card>
-
-      <Button 
-        title="Logout" 
-        onPress={handleLogout} 
-        variant="outline"
-        style={styles.logoutButton}
-      />
-    </View>
+        </View>
+      </ScrollView >
+    </View >
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: '#f9f9f9' },
-  avatar: { backgroundColor: '#e5e7eb', marginBottom: 16 },
-  name: { fontSize: 28, fontWeight: 'bold', color: '#555', marginBottom: 24 , alignContent: 'center'},
-  card: { width: '100%', borderRadius: 12, backgroundColor: 'white', padding: 16, marginBottom: 16, elevation: 3 },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  label: { fontSize: 16, fontWeight: '600', color: '#555' },
-  value: { fontSize: 16, fontWeight: '400', color: '#333' },
-  editButtonContainer: { width: '100%', alignItems: 'flex-end', marginBottom: 16, marginTop: 16 },
-  editButton: { paddingVertical: 12, paddingHorizontal: 32, backgroundColor: '#007aff', borderRadius: 8 },
-  editButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
-  logoutButton: { width: '50%' },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 16, fontSize: 16, color: '#666' },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    backgroundColor: '#fff',
+  },
+  contentContainer: {
+    paddingTop: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  secondTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#444',
+    marginTop: 10,
+    marginBottom: 16,
+  },
+  thirdTitle: {
+    color: '#4b5563',
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  aiTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    marginBottom: 16,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 100,
+  },
+  imageBox: {
+    width: 120,
+    height: 120,
+    borderRadius: 100,
+    borderWidth: 2,
+    borderColor: '#d0c4fb',
+    backgroundColor: '#F5F5FF',
+  },
+  loadingImageBox: {
+    width: 120,
+    height: 120,
+    borderRadius: 100,
+  },
 });
 
 export default ProfilePlaceholder;

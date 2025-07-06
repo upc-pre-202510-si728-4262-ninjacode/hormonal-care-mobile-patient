@@ -2,13 +2,12 @@ import { API_URL } from '@env';
 import axios from 'axios';
 import { getToken } from '../common/storage/tokenStorage';
 
-
 export const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: 'http://192.168.88.5:8080',
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 seconds timeout
+
 });
 
 // Add request interceptor to include token on authenticated requests

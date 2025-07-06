@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ProfileEntity } from '../../modules/profile/entities/profile.entity';
 
 const TOKEN_KEY = '@auth_token';
 const USER_KEY = '@user_data';

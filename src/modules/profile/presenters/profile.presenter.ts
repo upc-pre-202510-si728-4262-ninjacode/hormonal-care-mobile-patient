@@ -1,28 +1,41 @@
-import { ProfileInteractor } from '../interactors/profile.interactor';
-import { ProfileEntity } from '../entities/profile.entity';
-import { PatientEntity } from '../entities/patient.entity';
+import { FullDataProfileEntity } from "../entities/profile.entity";
+import { ProfileInteractor } from "../interactors/profile.interactor";
 
-interface View {
-  displayProfile(profile: ProfileEntity, patient: PatientEntity): void;
-  displayError(message: string): void;
+
+interface ProfileViewInterface {
+  showLoading: () => void;
+  hideLoading: () => void;
+  showError: (message: string) => void;
+  showProfile: (profile: FullDataProfileEntity) => void;
 }
 
 export class ProfilePresenter {
-  private interactor: ProfileInteractor;
-  private view: View;
+  private profileView: ProfileViewInterface | null = null;
+  private interactor : ProfileInteractor;
+  
+  constructor(interactor: ProfileInteractor) {
+    this.interactor = interactor;
+  }
 
-  constructor(view: View) {
-    this.view = view;
-    this.interactor = new ProfileInteractor();
+  attachProfileView(view: ProfileViewInterface) {
+    this.profileView = view;
   }
 
   async loadProfile(userId: number) {
+    if (!this.profileView) return;
+
     try {
-      const profile = await this.interactor.fetchProfile(userId);
-      const patient = await this.interactor.fetchPatient(profile.id);
-      this.view.displayProfile(profile, patient);
+      this.profileView.showLoading();
+      const profile = await this.interactor.fetchFullProfileData(userId);
+      this.profileView.showProfile(profile);
     } catch (error) {
-      this.view.displayError('Failed to load profile');
+      console.error('Error loading profile:', error);
+      this.profileView.showError('Failed to load profile');
+    } finally {
+      setTimeout(() => {
+        this.profileView?.hideLoading();
+      }, 1000);
     }
   }
+
 }

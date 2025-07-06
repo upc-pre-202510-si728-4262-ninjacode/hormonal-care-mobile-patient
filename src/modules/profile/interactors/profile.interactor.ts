@@ -1,5 +1,5 @@
 import { apiClient } from '../../../config/api';
-import { ProfileEntity } from '../entities/profile.entity';
+import { FullDataProfileEntity, ProfileEntity } from '../entities/profile.entity';
 import { PatientEntity } from '../entities/patient.entity';
 
 export class ProfileInteractor {
@@ -12,4 +12,23 @@ export class ProfileInteractor {
     const response = await apiClient.get(`/api/v1/medical-record/patient/${profileId}`);
     return response.data as PatientEntity;
   }
+
+  async fetchFullProfileData(userId: number): Promise<FullDataProfileEntity> {
+    const profile = await this.fetchProfile(userId);
+    const patient = await this.fetchPatient(profile.id);
+    const fullData : FullDataProfileEntity = {
+      id: profile.id,
+      fullName: profile.fullName,
+      gender: profile.gender,
+      phoneNumber: profile.phoneNumber,
+      image: profile.image,
+      birthday: profile.birthday,
+      typeOfBlood: patient.typeOfBlood,
+      personalHistory: patient.personalHistory,
+      familyHistory: patient.familyHistory,
+      doctorId: patient.doctorId,
+    }
+    return fullData;
+  }
+
 }
