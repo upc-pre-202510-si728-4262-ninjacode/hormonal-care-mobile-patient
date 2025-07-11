@@ -19,6 +19,7 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   MainApp: NavigatorScreenParams<TabStackParamList>;
   Notifications: undefined;
+  ChatScreen: undefined;
   AppointmentsSearch: undefined;
   AppointmentsHome: undefined;
   ProfileHome: undefined;

@@ -28,36 +28,27 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   // Add this function to improve error handling in checkAuth
   const checkAuth = async () => {
+    console.log('AuthContext: Starting auth check...');
     try {
       const userData = await getUserData();
+      console.log('AuthContext: User data from storage:', userData ? 'Found' : 'Not found');
+      
       if (userData && userData.token) {
-        try {
-          const authInteractor = new AuthInteractor();
-          const hasProfile = await authInteractor.checkProfileExists(userData.id);
-          
-          if (hasProfile) {
-            setUser(userData);
-            setIsAuthenticated(true);
-          } else {
-            // User is authenticated but doesn't have a profile
-            setUser(userData);
-            setIsAuthenticated(false);
-          }
-        } catch (networkError) {
-          console.error('Network error during profile check:', networkError);
-          // Assume user is authenticated if we have token but can't check profile due to network
-          setUser(userData);
-          setIsAuthenticated(true);
-        }
+        // For now, skip profile check to avoid network issues blocking the app
+        console.log('AuthContext: Setting user as authenticated without profile check');
+        setUser(userData);
+        setIsAuthenticated(true);
       } else {
+        console.log('AuthContext: No user data found');
         setUser(null);
         setIsAuthenticated(false);
       }
-    } catch (e) {
-      console.error('Auth check failed:', e);
+    } catch (error) {
+      console.error('AuthContext: Error during auth check:', error);
       setUser(null);
       setIsAuthenticated(false);
     } finally {
+      console.log('AuthContext: Auth check completed, setting loading to false');
       setIsLoading(false);
     }
   };

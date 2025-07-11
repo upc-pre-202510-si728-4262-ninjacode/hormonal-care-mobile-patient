@@ -3,6 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar, View, Image, StyleSheet, Animated } from 'react-native';
 import { RootNavigator } from './src/modules/navigation/view/RootNavigator';
 import { AuthProvider } from './src/common/contexts/AuthContext';
+import { ProfileProvider } from './src/common/contexts/ProfileContext';
 import Toast from 'react-native-toast-message';
 import AppBackground from './src/common/components/AppBackground';
 
@@ -45,11 +46,13 @@ export default function App() {
         pointerEvents={appReady ? 'auto' : 'none'}
       >
         <AuthProvider>
-          <SafeAreaProvider>
-            <StatusBar translucent backgroundColor="transparent" />
-            <RootNavigator />
-            <Toast />
-          </SafeAreaProvider>
+          <ProfileProvider>
+            <SafeAreaProvider>
+              <StatusBar translucent backgroundColor="transparent" />
+              <RootNavigator />
+              <Toast />
+            </SafeAreaProvider>
+          </ProfileProvider>
         </AuthProvider>
       </Animated.View>
 

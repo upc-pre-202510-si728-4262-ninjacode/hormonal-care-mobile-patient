@@ -7,6 +7,7 @@ import { RootStackParamList } from '../entity/navigationEntities';
 import AuthNavigator from './AuthNavigator';
 import BottomTabNavigator from './BottomTabNavigator';
 import NotificationsScreen from '../../notifications/views/NotificationsScreen';
+import ChatScreen from '../../ia/views/ChatScreen';
 import { useAuth } from '../../../common/contexts/AuthContext';
 import SettingsScreen from '../../settings/views/SettingsPlaceholder';
 
@@ -31,6 +32,16 @@ export const RootNavigator = () => {
         ) : (
           <>
             <Stack.Screen name="MainApp" component={BottomTabNavigator} />
+            <Stack.Screen
+              name="ChatScreen"
+              component={ChatScreen}
+              options={{
+                headerShown: false,
+                cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
+                gestureEnabled: true,
+                gestureDirection: 'vertical',
+              }}
+            />
             <Stack.Screen
               name="Notifications"
               component={NotificationsScreen}

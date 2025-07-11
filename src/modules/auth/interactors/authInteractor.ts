@@ -33,7 +33,7 @@ export class AuthInteractor {
 
   async checkProfileExists(userId: number): Promise<boolean> {
     try {
-      const response = await apiClient.get<boolean>(`/api/v1/profile/profile/userId/exists/${userId}`);
+      const response = await apiClient.get<boolean>(`/api/v1/profile/userId/exists/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Check profile error:', error);

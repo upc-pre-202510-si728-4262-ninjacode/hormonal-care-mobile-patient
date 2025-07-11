@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { HomeRouter } from '../router/home.router';
 import { getUserData } from '../../../common/storage/tokenStorage';
+import { useProfile } from '../../../common/contexts/ProfileContext';
 
 const HomeScreen = ({ navigation }: any) => {
   const [user, setUser] = useState<any>(null);
+  const { profile, loading, error, refreshProfile } = useProfile();
 
   const symptomPrompts = [
     "I've been feeling tired lately",
@@ -29,6 +31,29 @@ const HomeScreen = ({ navigation }: any) => {
     fetchUserData();
   }, []);
 
+  const handleChatPress = () => {
+    if (!profile) {
+      console.log('HomeScreen: Profile not loaded, cannot start chat');
+      return;
+    }
+    console.log('HomeScreen: Starting chat with profile:', profile);
+    HomeRouter.goToChat(navigation);
+  };
+
+  const handleRetryProfile = () => {
+    console.log('HomeScreen: Retrying profile load...');
+    refreshProfile();
+  };
+
+  const getChatButtonText = () => {
+    if (loading) return 'Cargando perfil...';
+    if (error) return 'Reintentar cargar perfil';
+    if (!profile) return 'Perfil requerido para chat';
+    return 'Iniciar CareChat';
+  };
+
+  const isChatButtonDisabled = loading || (!profile && !error);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -36,6 +61,13 @@ const HomeScreen = ({ navigation }: any) => {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.welcomeText}>Welcome {user?.username}!</Text>
+        
+        {loading && (
+          <Text style={styles.statusText}>🔄 Cargando perfil...</Text>
+        )}
+        {error && (
+          <Text style={styles.errorText}>⚠️ Error al cargar perfil</Text>
+        )}
 
         <View style={styles.promptsSection}>
           <Text style={styles.promptTitle}>How are you feeling today?</Text>
@@ -43,10 +75,11 @@ const HomeScreen = ({ navigation }: any) => {
           {symptomPrompts.map((prompt, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.promptButton}
-              onPress={() => HomeRouter.goToChat(navigation)}
+              style={[styles.promptButton, isChatButtonDisabled && styles.disabledButton]}
+              onPress={error ? handleRetryProfile : handleChatPress}
+              disabled={!!isChatButtonDisabled}
             >
-              <Text style={styles.promptText}>{prompt}</Text>
+              <Text style={[styles.promptText, isChatButtonDisabled && styles.disabledText]}>{prompt}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -54,10 +87,16 @@ const HomeScreen = ({ navigation }: any) => {
 
       <View style={styles.fixedButtonContainer}>
         <TouchableOpacity
-          style={styles.chatButton}
-          onPress={() => HomeRouter.goToChat(navigation)}
+          style={[styles.chatButton, isChatButtonDisabled && styles.disabledChatButton]}
+          onPress={error ? handleRetryProfile : handleChatPress}
+          disabled={!!isChatButtonDisabled}
         >
-          <Text style={styles.chatButtonText}>Iniciar Consulta con IA</Text>
+          <View style={styles.chatButtonContent}>
+            <Text style={styles.chatButtonIcon}>💬</Text>
+            <Text style={[styles.chatButtonText, isChatButtonDisabled && styles.disabledChatButtonText]}>
+              {getChatButtonText()}
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -120,10 +159,51 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
   },
+  chatButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chatButtonIcon: {
+    fontSize: 20,
+    marginRight: 8,
+  },
   chatButtonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  disabledButton: {
+    backgroundColor: '#E5E7EB',
+    opacity: 0.6,
+  },
+  disabledText: {
+    color: '#9CA3AF',
+  },
+  disabledChatButton: {
+    backgroundColor: '#9CA3AF',
+    opacity: 0.6,
+  },
+  disabledChatButtonText: {
+    color: '#E5E7EB',
+  },
+  statusText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#DC2626',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  successText: {
+    fontSize: 14,
+    color: '#059669',
+    marginBottom: 8,
+    textAlign: 'center',
   },
 });
 
